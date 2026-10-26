@@ -1,0 +1,4 @@
+# Re-include the worktrees for code search tools (ripgrep reads .ignore over .gitignore).
+# Git ignores this file's patterns; it only affects search.
+!/hl-budget-backend/
+!/hl-budget-frontend/
