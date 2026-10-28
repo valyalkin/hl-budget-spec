@@ -26,6 +26,7 @@ The code is in two service repositories, one service each:
 | Feature | Status |
 |---|---|
 | [001-platform-foundation](specs/001-platform-foundation/spec.md) | Implemented 2026-10-26: sign-in, profile, deployed to the homelab |
+| [002-spending-tracking](specs/002-spending-tracking/spec.md) | Implemented 2026-10-27 (backend only): spendings, accounts and categories with 17 fixed defaults, in CAD; deployed to the homelab |
 
 ## Working here
 
