@@ -600,7 +600,8 @@ b653935)**:
 | `pnpm build` | compiled successfully |
 | `pnpm e2e` (no credentials) | 7 passed, 21 skipped (signed-in journeys need `E2E_USERNAME`/`E2E_PASSWORD`) |
 | `pnpm e2e` (signed in, run by the user) | 24 passed, 1 skipped, 3 failed → fixed in T095 |
-| `pnpm e2e` (signed in, rerun by the user) | 25 passed, 1 skipped, 2 failed, both test bugs: a loose "Groceries" match also hit the leftover "GroceriesGroceries" category, and `addSpendingViaUi` expected one row per merchant though the autofill spec adds the same merchant twice. Fixed in 650e368 (exact match; `.first()`); the app fix from T095 held. Third run pending (T085) |
+| `pnpm e2e` (signed in, rerun by the user) | 25 passed, 1 skipped, 2 failed, both test bugs: a loose "Groceries" match also hit the leftover "GroceriesGroceries" category, and `addSpendingViaUi` expected one row per merchant though the autofill spec adds the same merchant twice. Fixed in 650e368 (exact match; `.first()`); the app fix from T095 held |
+| `pnpm e2e` (signed in, third run by the user) | 26 passed, 1 skipped, 1 failed, a test bug: the autofill spec typed only the first 12 characters of its marker, which merchants left by earlier failed runs share, so autofill rightly suggested one of those. Fixed in d90a392: it types the whole marker and first removes `e2e-kbd-` leftovers. Fourth run pending (T085) |
 | Browser check by the user | calendar, lists, merchant width, auto-open calendar, arrows, default date and Enter confirmed ("All good") |
 
 **Checkpoint**: Review fixes done; T085 needs a clean signed-in e2e rerun after T095; T086–T087 remain open.
