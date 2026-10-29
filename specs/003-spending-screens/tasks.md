@@ -569,7 +569,7 @@ out: the signed-out screen shows, and Back does not reveal spendings.
 - [X] T084 [P] Update `hl-budget-backend/README.md` (the new endpoints and the by-name spending fields) and `hl-budget-frontend/README.md` (routes `/` and `/spendings`, the new e2e specs and their data-cleanup marker, the axe check) · skill: backend-developer, frontend-developer
 - [ ] T085 Run the full gates. Backend: `./gradlew check`; confirm `git diff origin/main -- contracts/api.yaml` contains only what `specs/003-spending-screens/contracts/openapi.yaml` describes. Frontend: `pnpm typecheck && pnpm lint && pnpm test && pnpm build && pnpm e2e`. Then run quickstart §2 and §4 by hand · skill: backend-developer, frontend-developer
 - [X] T086 Operator step (ask the user first): open the backend PR, merge it after review, and let the release workflow open the hl-helm image PR; merge that. Then do the same for the frontend. Backend first: its additions are inert for the running frontend · skill: none
-- [ ] T087 Verify both rollouts with `homelab:hl-deploy-status` (Argo CD Synced/Healthy, pods Ready). Sign in on the live host and repeat quickstart §4 rows 2, 6 and 11. Record the result in the **Status** line of `specs/003-spending-screens/spec.md` · skill: homelab:hl-deploy-status
+- [X] T087 Verify both rollouts with `homelab:hl-deploy-status` (Argo CD Synced/Healthy, pods Ready). Sign in on the live host and repeat quickstart §4 rows 2, 6 and 11. Record the result in the **Status** line of `specs/003-spending-screens/spec.md` · skill: homelab:hl-deploy-status
 
 ---
 
@@ -759,14 +759,14 @@ What was built differs from the task text in these places; the code and tests fo
   - All CI checks were green before each merge. The frontend's first gitleaks run flagged a made-up
     UUID in a unit test (`generic-api-key`, a false positive); fixed in 24fe290 (generated at run
     time, plus `.gitleaksignore` for the historical commit).
-- **T087 (rollout verified 2026-10-29; live sign-in check pending)**:
+- **T087 (done 2026-10-29)**:
   - Argo CD `hl-budget` is Synced and Healthy at hl-helm 782e507.
   - Both Deployments run the new images, and both pods are 1/1 Ready.
   - Backend: Flyway validated 3 migrations (no new migration) and the app started cleanly.
   - Through the ingress, signed out: `/` answers 200 with "You're signed out", `/spendings` 302s to
     `/auth/login?returnTo=%2Fspendings`, `/home` 308s to `/spendings`, and `/api/v1/monthly-totals`
     answers 401.
-  - Still to do by the user: sign in on the live host and repeat quickstart §4 rows 2, 6 and 11.
+  - The user signed in on the live host and checked the live Spendings screen ("all good").
 - **T085 (automated part done 2026-10-28)**: the signed-in `pnpm e2e` passes, including the
   axe scans (27 passed, 1 skipped by design; see Phase 11's gate evidence). The contract check also passes:
   `git diff origin/main -- contracts/api.yaml` in the backend adds only the three paths and the
