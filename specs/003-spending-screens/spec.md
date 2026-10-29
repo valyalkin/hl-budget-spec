@@ -4,7 +4,7 @@
 
 **Created**: 2026-10-28
 
-**Status**: Implemented 2026-10-28 on branch `003-spending-screens` in hl-budget-backend and hl-budget-frontend (not yet merged or deployed). Gates green; signed-in e2e journeys not yet run (need the Auth0 test user). Revised the same day after the user's hands-on review (Clarifications, post-implementation review; tasks.md Phase 11)
+**Status**: Implemented 2026-10-28 on branch `003-spending-screens` in hl-budget-backend and hl-budget-frontend (not yet merged or deployed). Gates green, including the signed-in e2e journeys and axe scans; by-hand quickstart checks pending. Revised the same day after the user's hands-on review (Clarifications, post-implementation review; tasks.md Phase 11)
 
 **Input**: User description: "Now I would like to build frontend for the budget app functionality - I have designed the pages in claude design - https://claude.ai/code/artifact/be0595bc-5e5a-41cf-9fe0-6264edaa7efa. [Design summary: header with Sign in / Sign out and a user icon; signed-out message; Spendings screen with a year and month line, a compact table of the month's spendings with an inline add row (date calendar, merchant, category, account, amount), a month total card and a By category card with Table / Pie toggle; Settings window with Categories and Accounts sections and removal rules.] Also include deleting functionality for the row. When the user is adding spendings, for categories or account, when the user starts typing, we need to autofill the field with frequently used data which corresponds to whatever the user is typing. When user completes the field, when he presses TAB or ENTER, it needs to move to the next field or save it when all fields are complete. There must be edit and remove buttons on hover as well."
 

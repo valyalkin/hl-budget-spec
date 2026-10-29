@@ -601,10 +601,11 @@ b653935)**:
 | `pnpm e2e` (no credentials) | 7 passed, 21 skipped (signed-in journeys need `E2E_USERNAME`/`E2E_PASSWORD`) |
 | `pnpm e2e` (signed in, run by the user) | 24 passed, 1 skipped, 3 failed → fixed in T095 |
 | `pnpm e2e` (signed in, rerun by the user) | 25 passed, 1 skipped, 2 failed, both test bugs: a loose "Groceries" match also hit the leftover "GroceriesGroceries" category, and `addSpendingViaUi` expected one row per merchant though the autofill spec adds the same merchant twice. Fixed in 650e368 (exact match; `.first()`); the app fix from T095 held |
-| `pnpm e2e` (signed in, third run by the user) | 26 passed, 1 skipped, 1 failed, a test bug: the autofill spec typed only the first 12 characters of its marker, which merchants left by earlier failed runs share, so autofill rightly suggested one of those. Fixed in d90a392: it types the whole marker and first removes `e2e-kbd-` leftovers. Fourth run pending (T085) |
+| `pnpm e2e` (signed in, third run by the user) | 26 passed, 1 skipped, 1 failed, a test bug: the autofill spec typed only the first 12 characters of its marker, which merchants left by earlier failed runs share, so autofill rightly suggested one of those. Fixed in d90a392: it types the whole marker and first removes `e2e-kbd-` leftovers. |
+| `pnpm e2e` (signed in, fourth run by the user, on d90a392) | **all passed**: 27 passed, 1 skipped (the API-down case needs `E2E_DOWN_BASE_URL`, by design) |
 | Browser check by the user | calendar, lists, merchant width, auto-open calendar, arrows, default date and Enter confirmed ("All good") |
 
-**Checkpoint**: Review fixes done; T085 needs a clean signed-in e2e rerun after T095; T086–T087 remain open.
+**Checkpoint**: Review fixes done; the signed-in e2e suite passes. T085's by-hand quickstart checks and T086–T087 remain open.
 
 ---
 
@@ -752,7 +753,15 @@ What was built differs from the task text in these places; the code and tests fo
   under 200 ms over 10,000 spendings.
 - **Phase 11 (T088–T094)**: added after the user's hands-on review; see that phase for the
   changes, the FRs they serve and the gate evidence.
-- **T085 (open)**: `./gradlew check` and `pnpm typecheck && pnpm lint && pnpm test && pnpm build`
+- **T085 (automated part done 2026-10-28)**: the signed-in `pnpm e2e` passes, including the
+  axe scans (27 passed, 1 skipped by design; see Phase 11's gate evidence). The contract check also passes:
+  `git diff origin/main -- contracts/api.yaml` in the backend adds only the three paths and the
+  schemas in `contracts/openapi.yaml` plus `LastAccount`; its 10 removed lines are reworded
+  descriptions and `categoryId`/`accountId` leaving the request's `required` list (by-name
+  alternative), so no response changes and existing callers keep working. Still open: quickstart
+  §2 by hand (notably row 9, another user's token sees none of this user's data) and the rest of
+  §4.
+- **T085 (earlier note)**: `./gradlew check` and `pnpm typecheck && pnpm lint && pnpm test && pnpm build`
   are green. `pnpm e2e` ran 7 signed-out checks (all passed); the 21 signed-in journeys and the
   signed-in axe scans need `E2E_USERNAME`/`E2E_PASSWORD` and a running backend. Quickstart §2 and
   §4 by hand are not done yet.
