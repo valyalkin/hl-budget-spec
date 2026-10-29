@@ -27,12 +27,14 @@ The code is in two service repositories, one service each:
 |---|---|
 | [001-platform-foundation](specs/001-platform-foundation/spec.md) | Implemented 2026-10-26: sign-in, profile, deployed to the homelab |
 | [002-spending-tracking](specs/002-spending-tracking/spec.md) | Implemented 2026-10-27 (backend only): spendings, accounts and categories with 17 fixed defaults, in CAD; deployed to the homelab |
+| [003-spending-screens](specs/003-spending-screens/spec.md) | Implemented 2026-10-29: the Spendings screen (month line, table with inline add/edit/remove, autofill and keyboard entry, month total, By category table and pie) and Settings for categories and accounts; backend totals, merchants and spendings by name; deployed to the homelab |
 
 ## Working here
 
 A feature moves through `/speckit-specify` → `/speckit-clarify` → `/speckit-plan` →
 `/speckit-tasks` → `/speckit-implement`. Branches are named after the feature
-(`001-platform-foundation`) in this repo and in the service repos.
+(`001-platform-foundation`) in this repo and in the service repos. Once a feature is deployed,
+add or update its row under **Features** above.
 
 The service repos can be checked out inside this folder as git worktrees, so one session sees
 the spec and the code together. Git ignores them here (`.gitignore`); code search still finds
