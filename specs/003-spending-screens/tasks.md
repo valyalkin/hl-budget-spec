@@ -587,6 +587,8 @@ Frontend only; no API or contract change. All paths are in `hl-budget-frontend/`
 - [X] T093 [US2] A new spending starts in the shown month: today in the current month, otherwise the 1st of the shown month, via `defaultDateFor` in `app/lib/utils.ts`, used by `spendings-table.tsx`. Serves FR-030 · Evidence: `utils.test.ts` › "a new spending starts today in the current month, else on the 1st of the shown month" · skill: frontend-developer
 - [X] T094 [US2] Enter on the Spendings screen opens a new row when nothing has focus, no row is open and no dialog is open; Enter on a focused control keeps its own meaning. The + button gets `aria-keyshortcuts="Enter"` and the title "Add a spending row (Enter)". Changes are in `app/ui/spendings/spendings-table.tsx`. Serves FR-030 · Evidence: `spendings-table.test.tsx` › "Enter with nothing focused opens a new row, but not while something has focus", "Enter on a focused control keeps its own meaning" · skill: frontend-developer
 
+- [X] T095 [US3] First signed-in `pnpm e2e` run (by the user, 2026-10-28): 24 passed, 1 skipped, 3 failed. (a) App bug: accepting a past merchant fills category and account, but when focus reached the field before the filled value, the cursor sat after it and typed text was appended ("GroceriesGroceries" was saved as a new category). Fix: `app/ui/spendings/combobox.tsx` selects a value set from outside while the field has focus. Serves FR-058 · Evidence: `combobox.test.tsx` › "a value filled from outside while focused is selected, so typing replaces it", which fails without the fix and passes with it. (b) Test bug: `e2e/settings.spec.ts` matched the "Add" button loosely, and the marker `e2e-add` also matched "Remove Cat e2e-add-…"; it now uses `exact: true`. (c) Flaky login: on Auth0's page the password was typed into the email field; `completeUniversalLogin` in `e2e/support.ts` now fills and checks both fields, retrying until both hold. Commit 580e74e · skill: frontend-developer
+
 **Gate evidence (2026-10-28, `hl-budget-frontend` branch `003-spending-screens`, commit
 b653935)**:
 
@@ -594,12 +596,13 @@ b653935)**:
 |------|--------|
 | `pnpm typecheck` | pass |
 | `pnpm lint` | pass (0 problems) |
-| `pnpm test` | 24 files, 185 tests passed (175 before this phase; 10 new) |
+| `pnpm test` | 24 files, 185 tests passed (175 before this phase; 10 new); 186 after T095 |
 | `pnpm build` | compiled successfully |
-| `pnpm e2e` | 7 passed, 21 skipped (signed-in journeys need `E2E_USERNAME`/`E2E_PASSWORD`; see T085) |
+| `pnpm e2e` (no credentials) | 7 passed, 21 skipped (signed-in journeys need `E2E_USERNAME`/`E2E_PASSWORD`) |
+| `pnpm e2e` (signed in, run by the user) | 24 passed, 1 skipped, 3 failed → fixed in T095; rerun pending (T085) |
 | Browser check by the user | calendar, lists, merchant width, auto-open calendar, arrows, default date and Enter confirmed ("All good") |
 
-**Checkpoint**: Review fixes done; T085–T087 remain open as before.
+**Checkpoint**: Review fixes done; T085 needs a clean signed-in e2e rerun after T095; T086–T087 remain open.
 
 ---
 
