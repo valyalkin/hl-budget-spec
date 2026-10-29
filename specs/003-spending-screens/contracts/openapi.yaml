@@ -1,0 +1,300 @@
+openapi: 3.1.0
+info:
+  title: HL Budget API — feature 003 additions
+  version: "1"
+  description: |
+    Additions to the v1 contract published by features 001 and 002. Everything here is backward
+    compatible (Principle VII): three new read-only paths, two request fields relaxed from
+    required to optional with two new optional alternatives, and one new refusal reason on
+    DELETE /api/v1/accounts/{accountId}.
+
+    Shared components not repeated here (Money, Ref, Spending, Problem, the common error
+    responses, bearerAuth) are those of specs/002-spending-tracking/contracts/openapi.yaml.
+    The backend's generated contracts/api.yaml is the source the frontend builds from.
+servers:
+  - url: /
+security:
+  - bearerAuth: []
+
+paths:
+  /api/v1/monthly-totals:
+    get:
+      operationId: listMonthlyTotals
+      tags: [Totals]
+      summary: The caller's spending total and count for each month of a year
+      description: |
+        Always returns 12 entries, January to December; a month with no spendings has a zero
+        total and count. `today` is the current date in the app's time zone, so clients can
+        tell which months are in the future without a clock of their own.
+      parameters:
+        - name: year
+          in: query
+          required: false
+          description: Calendar year; defaults to the current year in the app's time zone
+          schema: { type: integer, minimum: 2000, maximum: 2100 }
+          example: 2026
+      responses:
+        "200":
+          description: Twelve months
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/MonthlyTotals" }
+              example:
+                year: 2026
+                today: "2026-10-28"
+                months:
+                  - { month: "2026-01", total: { amount: "0.00", currency: CAD }, spendingCount: 0 }
+                  - { month: "2026-09", total: { amount: "2741.10", currency: CAD }, spendingCount: 22 }
+                  - { month: "2026-10", total: { amount: "2748.42", currency: CAD }, spendingCount: 14 }
+                  - { month: "2026-11", total: { amount: "0.00", currency: CAD }, spendingCount: 0 }
+        "401": { $ref: "#/components/responses/Unauthenticated" }
+        "422": { $ref: "#/components/responses/ValidationFailed" }
+        "500": { $ref: "#/components/responses/Internal" }
+        "503": { $ref: "#/components/responses/Unavailable" }
+
+  /api/v1/category-totals:
+    get:
+      operationId: listCategoryTotals
+      tags: [Totals]
+      summary: The caller's spending per category over a date range
+      description: |
+        One entry per category with at least one spending in the range, and only those;
+        largest total first, ties by category name. Not paged: bounded by the caller's
+        category count.
+      parameters:
+        - name: from
+          in: query
+          required: true
+          description: Earliest date, inclusive
+          schema: { type: string, format: date }
+          example: "2026-10-01"
+        - name: to
+          in: query
+          required: true
+          description: Latest date, inclusive; not before `from`, at most 366 days after it
+          schema: { type: string, format: date }
+          example: "2026-10-31"
+      responses:
+        "200":
+          description: Totals per category; `items` is empty when nothing was spent
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/CategoryTotals" }
+              example:
+                from: "2026-10-01"
+                to: "2026-10-31"
+                total: { amount: "2748.42", currency: CAD }
+                spendingCount: 14
+                items:
+                  - category: { id: 5b1e2c3d-4f5a-4b6c-8d7e-9f0a1b2c3d44, name: Rent }
+                    total: { amount: "2150.00", currency: CAD }
+                    spendingCount: 1
+                  - category: { id: 2c8e4f6a-1b3d-4e5f-9a7b-8c0d1e2f3a55, name: Groceries }
+                    total: { amount: "176.44", currency: CAD }
+                    spendingCount: 2
+        "401": { $ref: "#/components/responses/Unauthenticated" }
+        "422": { $ref: "#/components/responses/ValidationFailed" }
+        "500": { $ref: "#/components/responses/Internal" }
+        "503": { $ref: "#/components/responses/Unavailable" }
+
+  /api/v1/merchants:
+    get:
+      operationId: listMerchants
+      tags: [Merchants]
+      summary: The caller's past merchants, most used first, for autofill
+      description: |
+        Merchants are derived from spendings, not stored: spendings whose merchant is equal
+        ignoring letter case and surrounding spaces count as one merchant. `name`,
+        `lastCategory` and `lastAccount` come from that merchant's most recent spending (latest
+        date, then latest created). Ordered by `spendingCount` descending, then `name`.
+      parameters:
+        - name: limit
+          in: query
+          required: false
+          description: Maximum number of merchants returned, 1 to 1000
+          schema: { type: integer, minimum: 1, maximum: 1000, default: 500 }
+      responses:
+        "200":
+          description: Merchants; `truncated` is true when more exist than `limit`
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/MerchantList" }
+              example:
+                truncated: false
+                items:
+                  - name: Neighbourhood Market
+                    spendingCount: 12
+                    lastUsedOn: "2026-10-27"
+                    lastCategory: { id: 2c8e4f6a-1b3d-4e5f-9a7b-8c0d1e2f3a55, name: Groceries }
+                    lastAccount: { id: 3f1c5a8e-2b7d-4e0a-9c61-0d2f4b8a7e11, name: Visa }
+        "401": { $ref: "#/components/responses/Unauthenticated" }
+        "422": { $ref: "#/components/responses/ValidationFailed" }
+        "500": { $ref: "#/components/responses/Internal" }
+        "503": { $ref: "#/components/responses/Unavailable" }
+
+  # Changed operations (bodies and responses otherwise as in 002)
+
+  /api/v1/spendings:
+    post:
+      operationId: createSpending
+      description: |
+        CHANGED in 003: the category and the account can each be given by id or by name
+        (exactly one of each pair). A name is matched against the caller's items ignoring
+        letter case and surrounding spaces; when none matches, the item is created in the same
+        transaction, with the usual name rules. If the spending is refused, nothing is created.
+        With an `Idempotency-Key`, a replay returns the first spending and creates nothing.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/SpendingRequest" }
+            examples:
+              byIds:
+                value:
+                  date: "2026-10-20"
+                  merchant: Loblaws
+                  amount: { amount: "84.37", currency: CAD }
+                  categoryId: 2c8e4f6a-1b3d-4e5f-9a7b-8c0d1e2f3a55
+                  accountId: 3f1c5a8e-2b7d-4e0a-9c61-0d2f4b8a7e11
+              byNames:
+                value:
+                  date: "2026-10-28"
+                  merchant: Riverside Café
+                  amount: { amount: "6.75", currency: CAD }
+                  categoryName: Coffee
+                  accountName: Visa
+      responses:
+        "422":
+          description: |
+            As in 002, plus: neither or both of `categoryId`/`categoryName` (pointer
+            `/categoryId`), the same for the account, or a new name that is blank or longer than
+            50 characters (pointer `/categoryName` or `/accountName`).
+          content:
+            application/problem+json:
+              example:
+                type: urn:problem:hl-budget:unprocessable-entity
+                title: Unprocessable Entity
+                status: 422
+                detail: "1 field is invalid: /categoryId"
+                traceId: 4bf92f3577b34da6a3ce929d0e0e4736
+                errors:
+                  - { field: /categoryId, message: "give exactly one of categoryId and categoryName" }
+
+  /api/v1/spendings/{spendingId}:
+    put:
+      operationId: updateSpending
+      description: |
+        CHANGED in 003: same id-or-name rule and same-transaction creation as createSpending.
+
+  /api/v1/accounts/{accountId}:
+    delete:
+      operationId: deleteAccount
+      description: |
+        CHANGED in 003: also refused when the account is the caller's only account (422,
+        `details.reason: last-account`). Checks run in this order: not found (404), in use
+        (409 `in-use`), last account (422 `last-account`).
+      responses:
+        "422":
+          description: The caller's only account cannot be deleted
+          content:
+            application/problem+json:
+              example:
+                type: urn:problem:hl-budget:unprocessable-entity
+                title: Unprocessable Entity
+                status: 422
+                detail: Account 3f1c5a8e-2b7d-4e0a-9c61-0d2f4b8a7e11 is the only account
+                traceId: 4bf92f3577b34da6a3ce929d0e0e4736
+                details: { reason: last-account }
+
+components:
+  schemas:
+    MoneyTotal:
+      type: object
+      description: |
+        A sum of amounts. Unlike Money it may be zero and has no 8-digit cap. Always 2 decimals.
+      required: [amount, currency]
+      properties:
+        amount: { type: string, pattern: '^\d+\.\d{2}$', example: "2748.42" }
+        currency: { type: string, pattern: '^[A-Z]{3}$', example: CAD }
+
+    MonthTotal:
+      type: object
+      required: [month, total, spendingCount]
+      properties:
+        month: { type: string, pattern: '^\d{4}-\d{2}$', example: "2026-10" }
+        total: { $ref: "#/components/schemas/MoneyTotal" }
+        spendingCount: { type: integer, format: int64, minimum: 0 }
+
+    MonthlyTotals:
+      type: object
+      required: [year, today, months]
+      properties:
+        year: { type: integer }
+        today: { type: string, format: date, description: "Today in the app's time zone" }
+        months:
+          type: array
+          minItems: 12
+          maxItems: 12
+          items: { $ref: "#/components/schemas/MonthTotal" }
+
+    CategoryTotal:
+      type: object
+      required: [category, total, spendingCount]
+      properties:
+        category: { $ref: "#/components/schemas/Ref" }
+        total: { $ref: "#/components/schemas/MoneyTotal" }
+        spendingCount: { type: integer, format: int64, minimum: 1 }
+
+    CategoryTotals:
+      type: object
+      required: [from, to, total, spendingCount, items]
+      properties:
+        from: { type: string, format: date }
+        to: { type: string, format: date }
+        total: { $ref: "#/components/schemas/MoneyTotal" }
+        spendingCount: { type: integer, format: int64, minimum: 0 }
+        items:
+          type: array
+          items: { $ref: "#/components/schemas/CategoryTotal" }
+
+    Merchant:
+      type: object
+      required: [name, spendingCount, lastUsedOn, lastCategory, lastAccount]
+      properties:
+        name: { type: string, description: Spelling on the most recent spending }
+        spendingCount: { type: integer, format: int64, minimum: 1 }
+        lastUsedOn: { type: string, format: date }
+        lastCategory: { $ref: "#/components/schemas/Ref" }
+        lastAccount: { $ref: "#/components/schemas/Ref" }
+
+    MerchantList:
+      type: object
+      required: [items, truncated]
+      properties:
+        items:
+          type: array
+          items: { $ref: "#/components/schemas/Merchant" }
+        truncated: { type: boolean }
+
+    SpendingRequest:
+      type: object
+      description: |
+        CHANGED in 003: `categoryId` and `accountId` are no longer required; give exactly one of
+        `categoryId`/`categoryName` and exactly one of `accountId`/`accountName`.
+      required: [date, merchant, amount]
+      properties:
+        date: { type: string, format: date, description: "Today or earlier, in the app's time zone" }
+        merchant: { type: string, minLength: 1, maxLength: 255 }
+        amount: { $ref: "#/components/schemas/Money" }
+        categoryId: { type: string, format: uuid, description: One of the caller's categories }
+        categoryName:
+          type: string
+          minLength: 1
+          maxLength: 50
+          description: Matched ignoring case; created when no category has this name
+        accountId: { type: string, format: uuid, description: One of the caller's accounts }
+        accountName:
+          type: string
+          minLength: 1
+          maxLength: 50
+          description: Matched ignoring case; created when no account has this name
