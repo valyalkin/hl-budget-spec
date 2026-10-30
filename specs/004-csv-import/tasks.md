@@ -830,7 +830,7 @@ and release.
   Ready, backend `/readyz` 200 after V4. Then run the live check from quickstart §4.3 with the
   sample file and delete the imported spendings afterwards. Record the result in the **Status**
   line of `specs/004-csv-import/spec.md` · skill: homelab:hl-deploy-status
-- [ ] T057 Update the Features table in the spec repo's `README.md` with feature 004, in a small
+- [X] T057 Update the Features table in the spec repo's `README.md` with feature 004, in a small
   docs PR (`docs: list feature 004 in the README`) · skill: none
 
 ---
