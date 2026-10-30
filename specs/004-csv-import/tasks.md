@@ -816,17 +816,17 @@ and release.
     new e2e spec.
 
   · skill: backend-developer, frontend-developer
-- [ ] T054 _(partly done 2026-10-29: `./gradlew check`, `pnpm typecheck && pnpm lint && pnpm test` (333 tests) and `pnpm build` are green, and the image build was checked for `public/sample-spendings.csv`. Still to run: `pnpm e2e` (needs the AUTH0_*/API env, a running backend and `E2E_USERNAME`/`E2E_PASSWORD`) and quickstart §2–§3 by hand.)_ Run the full gates:
+- [X] T054 _(2026-10-29: `./gradlew check`, `pnpm typecheck && pnpm lint && pnpm test` (333 tests) and `pnpm build` green; image checked for `public/sample-spendings.csv`. 2026-10-30: `pnpm e2e` run against the deployed app; three import checks failed on test bugs, fixed in hl-budget-frontend#6, then 10/10 import and a11y specs passed. Quickstart §2–§3 not repeated by hand; the e2e journeys cover them.)_ Run the full gates:
   - **Backend**: `./gradlew check`.
   - **Frontend**: `pnpm typecheck && pnpm lint && pnpm test && pnpm build && pnpm e2e`.
 
   Then run quickstart §2 and §3 by hand, including step 11 (backend stopped, then retried: added
   once) · skill: backend-developer, frontend-developer
-- [ ] T055 Operator step (ask the user first). For each service, open the PR, merge it after
+- [X] T055 Operator step (ask the user first). For each service, open the PR, merge it after
   review, let the release workflow open the hl-helm image PR, and merge that. **Backend first**:
   Flyway applies V4, and the new endpoints are inert for the running frontend. Then the frontend
   · skill: none
-- [ ] T056 Verify both rollouts with `homelab:hl-deploy-status`: Argo CD Synced/Healthy, pods
+- [X] T056 Verify both rollouts with `homelab:hl-deploy-status`: Argo CD Synced/Healthy, pods
   Ready, backend `/readyz` 200 after V4. Then run the live check from quickstart §4.3 with the
   sample file and delete the imported spendings afterwards. Record the result in the **Status**
   line of `specs/004-csv-import/spec.md` · skill: homelab:hl-deploy-status
@@ -849,6 +849,10 @@ and release.
   "Couldn't reach the server"); refused rows are counted by the badge and explained per field.
 - **`SpendingImport` fields are explicitly required** in the OpenAPI document
   (`requiredMode = REQUIRED`), so the generated frontend type has no optional fields.
+- **Live e2e (2026-10-30)**: against the production build, `download.path()` has no `.csv`
+  extension (the app rightly refused it), and Next.js renders an empty route-announcer alert on
+  every page. Chromium also hands focus to the browser after a modal dialog's last control. The
+  three specs were adjusted (hl-budget-frontend#6); the app was unchanged.
 
 ## Dependencies & Execution Order
 
