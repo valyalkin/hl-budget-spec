@@ -220,23 +220,34 @@ serves the same certificate.
   had a trailing newline (`jq -r`; use `jq -j`). The Vault value itself is clean. k3d cleaned up
   (releases, namespaces and the token copy removed; cert-manager CRDs remain, as `crds.keep`
   intends).*
-- [ ] T019 Open the hl-helm PR "005: cert-manager, ingress-tls, Vault role edge" from `hl-helm/`
+- [X] T019 Open the hl-helm PR "005: cert-manager, ingress-tls, Vault role edge" from `hl-helm/`
   (Conventional Commit messages). The description includes the rendered templates for the two
   new charts and the T018 results. CI green, then merge.
-- [ ] T020 On the homelab, from the merged and pulled `main`, re-run
+  *Done 2026-10-30: hl-helm#21 merged (CI gate and rendered-diff green).*
+- [X] T020 On the homelab, from the merged and pulled `main`, re-run
   `hl-helm/bootstrap/vault-init.sh` (idempotent). Check `vault read auth/kubernetes/role/edge`.
-- [ ] T021 `bootstrap/install.sh --context homelab --only cert-manager --diff`, have the owner
+  *Done 2026-10-30: role `edge` is live (service accounts ingress-tls/tailscale; the policy reads
+  the two paths only). Existing kv data untouched.*
+- [X] T021 `bootstrap/install.sh --context homelab --only cert-manager --diff`, have the owner
   review it, then apply without `--diff`. Check that the cert-manager pods are Ready.
-- [ ] T022 Same for `--only ingress-tls` (staging). Check:
+  *Done 2026-10-30: diff reviewed by the owner (additions only) and applied; 3 pods Running.
+  `install.sh --diff` needed `--allow-unreleased` for a new release (fixed in hl-helm#22).*
+- [X] T022 Same for `--only ingress-tls` (staging). Check:
   - `kubectl -n ingress-tls get certificate wildcard` shows `READY True`;
   - the VSO-synced Secret exists;
   - `openssl s_client -connect 10.0.0.100:443 -servername budget.<domain>` shows a "(STAGING)"
     Let's Encrypt issuer;
   - `curl -sI http://10.0.0.100/` returns a permanent redirect.
-- [ ] T023 Set `acme.server: production` in `hl-helm/bootstrap/values/ingress-tls.yaml` (small
+  *Done 2026-10-30: owner approved diff (7 additions); certificate READY at once, VSS synced; openssl shows `(STAGING)` issuer, SAN `*.valyalkin.com, valyalkin.com`; `http://` → 308 to https; old hl-budget host still 200; infra-status: `wildcard True`, 63 days left.*
+- [X] T023 Set `acme.server: production` in `hl-helm/bootstrap/values/ingress-tls.yaml` (small
   PR, merge). Run `--only ingress-tls --diff`, review, apply. If the Certificate does not reissue
   by itself, delete Secret `wildcard-tls` to force it. Quickstart **V2** passes: Let's Encrypt
   production issuer, SAN `<domain>, *.<domain>`.
+  *Done 2026-10-30: hl-helm#22 merged; owner approved the one-line Issuer diff. The Issuer change did
+  not reissue on its own, so `wildcard-tls` was deleted, and the production certificate was READY
+  about 2.5 minutes later. V2: issuer `Let's Encrypt YE1`, SAN `*.valyalkin.com, valyalkin.com`,
+  valid until 2027-01-28. `curl https://budget.valyalkin.com/` from the Mac verifies TLS with no
+  flags.*
 
 **Checkpoint**: every app on the homelab is served with the trusted wildcard certificate, and
 HTTP redirects to HTTPS.
@@ -250,7 +261,7 @@ HTTP redirects to HTTPS.
 **Independent Test**: quickstart **V1**: a phone, a tablet and a laptop on home Wi-Fi with
 Tailscale off and no hosts entries load the app, sign in and add a spending.
 
-- [ ] T024 [US1] In `hl-helm/charts/apps/hl-budget/values.yaml`, apply contract §6 exactly:
+- [X] T024 [US1] In `hl-helm/charts/apps/hl-budget/values.yaml`, apply contract §6 exactly:
   - both `ingress.host` values become `budget.<domain>`;
   - `APP_BASE_URL` becomes `https://budget.<domain>`;
   - remove both `ingress.tls` blocks and `frontend.secrets.tls`;
@@ -259,15 +270,26 @@ Tailscale off and no hosts entries load the app, sign in and add a spending.
   Bump `version` in `hl-helm/charts/apps/hl-budget/Chart.yaml` (patch), regenerate the README
   with `helm-docs`, and run `scripts/validate.sh` until `GATE PASS`.
   · skill: homelab:hl-service-config
-- [ ] T025 [US1] Open the hl-helm PR "hl-budget: move to budget.<domain>" with the rendered
+  *Done 2026-10-30: branch `config/hl-budget-host`, chart 0.2.10 → 0.2.11. The rendered diff is
+  exactly contract §6 (hosts, APP_BASE_URL, TLS VSS removed). GATE PASS.*
+- [X] T025 [US1] Open the hl-helm PR "hl-budget: move to budget.<domain>" with the rendered
   ingress and env diff, and wait for CI to pass. **Do not merge yet.**
-- [ ] T026 [US1] **MANUAL (owner)**: quickstart **M9**, done together with merging T025. In the
+  *Done 2026-10-30: hl-helm#23, CI green, not merged.*
+- [X] T026 [US1] **MANUAL (owner)**: quickstart **M9**, done together with merging T025. In the
   Auth0 dashboard, set Allowed Callback URLs to `https://budget.<domain>/auth/callback`, Allowed
   Logout URLs and Allowed Web Origins to `https://budget.<domain>`, and remove the
   `hl-budget.home.example` entries. Then merge the T025 PR.
-- [ ] T027 [US1] Wait for Argo CD to sync (about 6–10 min) and confirm `hl-budget` is
+  *In progress 2026-10-30: the owner added the new URLs alongside the old ones (no sign-in gap)
+  and hl-helm#23 was merged. After signing in on the new address, the owner removed the old
+  entries.*
+- [X] T027 [US1] Wait for Argo CD to sync (about 6–10 min) and confirm `hl-budget` is
   Synced/Healthy, with the frontend restarted and the ingresses showing host `budget.<domain>`
   with no `secretName`. · skill: homelab:hl-deploy-status
+  *Done 2026-10-30: Synced/Healthy about 30 s after a manual Argo CD refresh. Both ingresses have
+  host `budget.valyalkin.com` with no secret; the TLS VSS is gone; `APP_BASE_URL` updated. From
+  the Mac with no flags: `/` 200, `/auth/login` 307 to Auth0 with
+  `redirect_uri=https://budget.valyalkin.com/auth/callback`, `/api/v1/me` 401, `http://` 308. The
+  old host returns 404.*
 - [ ] T028 [US1] **MANUAL (owner)**: quickstart **M8**. Reserve `10.0.0.100` for the homelab
   machine in the router. Run the two `dig` commands from a laptop on home Wi-Fi with Tailscale
   off. If only the `@1.1.1.1` one answers, add a DNS rebind exception for `<domain>`; if the
@@ -289,7 +311,7 @@ internet; the VPN reaches only the homelab's ports 80 and 443.
 
 **Independent Test**: quickstart **V4**, **V5**, **V6** and **V9**.
 
-- [ ] T031 [P] [US2] Write `hl-helm/charts/infrastructure/tailscale/tests/tailscale_test.yaml`
+- [X] T031 [P] [US2] Write `hl-helm/charts/infrastructure/tailscale/tests/tailscale_test.yaml`
   (helm-unittest), covering contract §4:
   - rendering fails without `routes` or with empty `tags`;
   - the Deployment has 1 replica and strategy `Recreate`;
@@ -310,7 +332,7 @@ internet; the VPN reaches only the homelab's ports 80 and 443.
   - a memory limit is set.
 
   Run it; it fails.
-- [ ] T032 [US2] Rehearse the gateway on `k3d-homelab-test` before writing the chart (research
+- [X] T032 [US2] Rehearse the gateway on `k3d-homelab-test` before writing the chart (research
   R-006):
   - Run a throwaway pod with `tailscale/tailscale:v1.104.4`, UID 10001, a read-only root
     filesystem, `/tmp` as emptyDir, and `TS_USERSPACE=true`, `TS_SOCKET=/tmp/tailscaled.sock`,
@@ -322,7 +344,11 @@ internet; the VPN reaches only the homelab's ports 80 and 443.
   Record the working env set and any deviation under R-006 in `feat/research.md`. If non-root
   is impossible, record the fallback "root in userspace mode, no capabilities" for the chart
   README. The owner removes the test machine and revokes the key afterwards.
-- [ ] T033 [US2] Create `hl-helm/charts/infrastructure/tailscale/` per contract §4, depending on
+  *Done 2026-10-30, with the chart itself and the real OAuth client in ephemeral mode (no extra
+  key). Results and contract changes are in R-006. The end-to-end path can't be tested on k3d
+  (Docker Desktop has no LAN access), so it moves to V4. k3d cleaned up; the ephemeral
+  `homelab-test` machine expires on its own.*
+- [X] T033 [US2] Create `hl-helm/charts/infrastructure/tailscale/` per contract §4, depending on
   `hl-common`:
   - `Chart.yaml`: `version: 0.1.0`, `appVersion: "v1.104.4"`.
   - `values.yaml`: `image` (repository `tailscale/tailscale`, tag `v1.104.4`, digest resolved
@@ -342,7 +368,7 @@ internet; the VPN reaches only the homelab's ports 80 and 443.
     state Secret, and any T032 deviation with its expiry condition.
 
   T031 now passes.
-- [ ] T034 [P] [US2] Write `hl-helm/docs/remote-access.md`:
+- [X] T034 [P] [US2] Write `hl-helm/docs/remote-access.md`:
   - how remote access works (with the diagram from the 2026-10-30 discussion, simplified);
   - the tailnet policy (copy of `feat/contracts/tailnet-policy.md`);
   - adding a device;
@@ -351,7 +377,7 @@ internet; the VPN reaches only the homelab's ports 80 and 443.
   - the router-rebind fallback.
 
   Link it from `hl-helm/README.md` and `hl-helm/docs/access.md`.
-- [ ] T035 [US2] Add the `tailscale` entry to `hl-helm/bootstrap/install-order.yaml` after
+- [X] T035 [US2] Add the `tailscale` entry to `hl-helm/bootstrap/install-order.yaml` after
   `ingress-tls` (contract §1). In `hl-helm/scripts/infra-status.sh`, print a "Tailscale" line:
   the pod phase and the last `Health` / `Running` message from its logs, never the auth key.
 - [ ] T036 [US2] Run `hl-helm/scripts/validate.sh` until `GATE PASS`. Open the hl-helm PR "005:

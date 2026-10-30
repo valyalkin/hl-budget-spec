@@ -83,8 +83,8 @@ and from `valyalkin/hl-helm` `main` (`ab37b72`) on 2026-10-30:
   namespace `ingress-tls` is honoured. With SNI `nginx.valyalkin.com`, Traefik presented the
   staging certificate (`CN=valyalkin.com`, SAN `*.valyalkin.com, valyalkin.com`). No
   `kube-system` fallback is needed. The staging certificate was issued about 2.5 minutes after
-  the solver started (DNS-01 via Cloudflare, public-resolver self-check). Let's Encrypt now
-  issues **64-day** certificates; cert-manager renews at two thirds of the lifetime, which is
+  the solver started (DNS-01 via Cloudflare, public-resolver self-check). Let's Encrypt **staging**
+  issued a **64-day** certificate (production issued 90 days on 2026-10-30, T023); cert-manager renews at two thirds of the lifetime, which is
   about 21 days before expiry, so FR-004's "at least 2 weeks" still holds.
 
 ## R-005 HTTP to HTTPS redirect
@@ -132,6 +132,27 @@ and from `valyalkin/hl-helm` `main` (`ab37b72`) on 2026-10-30:
 - **To verify during implementation**: subnet routing in userspace mode as a non-root user with
   a read-only root filesystem (`TS_USERSPACE=true`, `TS_KUBE_SECRET`, `TS_SOCKET` and state under
   a tmp dir); the health endpoint (`TS_ENABLE_HEALTH_CHECK`, `TS_LOCAL_ADDR_PORT`) for probes.
+- **Confirmed 2026-10-30 (T032, k3d)**:
+  - Userspace mode runs as UID 10001 with a read-only root filesystem, no capabilities, `/tmp`
+    as emptyDir and `HOME=/tmp`. `/healthz` on 9002 drives the probes.
+  - The OAuth secret plus `?ephemeral=false&preauthorized=true` registers a tagged node
+    (`tag:homelab`) with key expiry off. `autoApprovers` approved `10.0.0.100/32` immediately.
+  - The identity persists in Secret `tailscale-state`: the same node ID across two pod restarts.
+  - No `tskey` in the logs.
+  - Changes from the contract:
+    - The secret is passed as `TAILSCALE_OAUTH_SECRET`. Containerboot v1.104 has a native OAuth
+      mode on `TS_CLIENT_SECRET` and refuses it together with `TS_AUTHKEY`; the native mode would
+      also default to ephemeral.
+    - The workload is a one-replica **StatefulSet**, which never runs two pods at once (hl-common
+      has no `Recreate` strategy).
+    - The Role also allows `events` create/patch.
+    - The pod creates the state Secret itself (Role: `create` on Secrets in the namespace;
+      `get`/`update`/`patch` only on `tailscale-state`). A pre-created Secret manifest, used in
+      the rehearsal, is forbidden by hl-helm's `no_secret_material` policy. First proven on the
+      homelab install (T037).
+  - Not testable on k3d: Docker Desktop's network can't reach the home LAN (even direct internet
+    connections fail; Tailscale used its relays). So the phone → gateway → 10.0.0.100 path is
+    proven on the homelab (V4), not here.
 
 ## R-007 Tailscale access policy
 

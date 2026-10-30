@@ -71,28 +71,38 @@ context).
 
 | Key | Default | Rule |
 |---|---|---|
-| `image` | `tailscale/tailscale` `v1.104.4` + digest | Pinned; never `latest` |
+| `tailscale.workload.image` | `docker.io/tailscale/tailscale` `v1.104.4` + digest | Pinned; never `latest` |
 | `routes` | — | Required; `["10.0.0.100/32"]` |
 | `hostname` | `homelab` | Tailnet machine name |
 | `tags` | `["tag:homelab"]` | Required non-empty (an OAuth key needs a tag) |
-| `auth.vaultPath` | `infra/tailscale` | Key `client_secret` |
-| `resources.limits.memory` | `128Mi` | Required by the platform |
+| `tailscale.secrets.auth.vaultPath` | `infra/tailscale` | Key `client_secret` |
+| `tailscale.workload.resources.limits.memory` | `128Mi` | Required by the platform |
 
-**Renders**: ServiceAccount + `VaultAuth`; `VaultStaticSecret` → Secret `tailscale-auth`; a
-Role/RoleBinding letting the service account `get`/`update`/`patch` only the Secret
-`tailscale-state`; one-replica Deployment (strategy `Recreate`) with:
+**Renders** (as built and rehearsed, 2026-10-30; research R-006):
 
-- env: `TS_USERSPACE=true`, `TS_ROUTES`, `TS_HOSTNAME`, `TS_KUBE_SECRET=tailscale-state`,
-  `TS_EXTRA_ARGS=--advertise-tags=<tags>`,
-  `TS_AUTHKEY=<client_secret>?ephemeral=false&preauthorized=true`, `TS_ENABLE_HEALTH_CHECK=true`,
-  `TS_LOCAL_ADDR_PORT=[::]:9002`, socket and tmp under `/tmp`;
-- the security context: UID/GID 10001, non-root, read-only root filesystem, all capabilities
-  dropped, no privilege escalation;
-- liveness and readiness probes on `/healthz` (port 9002);
-- no Service or Ingress (it only makes outbound connections).
+- ServiceAccount `tailscale` + `VaultAuth` (role `edge`);
+- `VaultStaticSecret` → Secret `tailscale-auth`, key `client_secret`, which restarts the pod when
+  it rotates;
+- a Role/RoleBinding: `create` on Secrets in the namespace (the pod creates `tailscale-state`
+  itself on first start; the repository policy forbids Secret manifests in charts), and
+  `get`/`update`/`patch` only on `tailscale-state`, plus `events`. Helm doesn't own the state
+  Secret, so uninstalls keep it;
+- a one-replica **StatefulSet** `tailscale`, which never runs two pods at once, with:
+  - env: `TS_USERSPACE=true`, `TS_ROUTES`, `TS_HOSTNAME`, `TS_KUBE_SECRET=tailscale-state`,
+    `TS_EXTRA_ARGS=--advertise-tags=<tags>`, `TS_ENABLE_HEALTH_CHECK=true`,
+    `TS_LOCAL_ADDR_PORT=[::]:9002`, `TS_SOCKET=/tmp/tailscaled.sock`, `HOME=/tmp`, and
+    `TAILSCALE_OAUTH_SECRET` from the Secret;
+  - command:
+    `export TS_AUTHKEY="${TAILSCALE_OAUTH_SECRET}?ephemeral=false&preauthorized=true"; exec containerboot`;
+  - hl-common's security context: UID/GID 10001, non-root, read-only root filesystem, all
+    capabilities dropped, no privilege escalation;
+  - startup, liveness and readiness probes on `/healthz` (port 9002);
+- a ClusterIP Service on 9002 (hl-common renders one for every workload; health only). No
+  Ingress.
 
-**Unit tests**: fails without `routes` or `tags`; the security context is set; the Role names
-exactly one Secret; no `NET_ADMIN`, `privileged` or `hostNetwork`.
+**Unit tests**: fails without `routes` or `tags`; rejects non-CIDR routes and tags without the
+`tag:` prefix; the security context is set; the Role names exactly one Secret; no `NET_ADMIN`,
+`privileged` or `hostNetwork`; the image is pinned by digest.
 
 ## 5. Vault (`bootstrap/vault-init.sh`)
 
