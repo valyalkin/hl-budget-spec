@@ -2,3 +2,4 @@
 # Git ignores this file's patterns; it only affects search.
 !/hl-budget-backend/
 !/hl-budget-frontend/
+!/hl-helm/
