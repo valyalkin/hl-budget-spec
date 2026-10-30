@@ -28,6 +28,7 @@ The code is in two service repositories, one service each:
 | [001-platform-foundation](specs/001-platform-foundation/spec.md) | Implemented 2026-10-26: sign-in, profile, deployed to the homelab |
 | [002-spending-tracking](specs/002-spending-tracking/spec.md) | Implemented 2026-10-27 (backend only): spendings, accounts and categories with 17 fixed defaults, in CAD; deployed to the homelab |
 | [003-spending-screens](specs/003-spending-screens/spec.md) | Implemented 2026-10-29: the Spendings screen (month line, table with inline add/edit/remove, autofill and keyboard entry, month total, By category table and pie) and Settings for categories and accounts; backend totals, merchants and spendings by name; deployed to the homelab |
+| [004-csv-import](specs/004-csv-import/spec.md) | Implemented 2026-10-30: Import CSV above the month total — drop or choose a file (or download the sample), read in the browser; review table with the Spendings table's editing, every field fixable before Add; all rows saved at once, all or nothing, retry-safe; deployed to the homelab |
 
 ## Working here
 
