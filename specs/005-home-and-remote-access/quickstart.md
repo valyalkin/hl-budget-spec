@@ -73,6 +73,10 @@ Install Tailscale on your phone (App Store / Play Store) and laptop
 subnet routes are used (macOS/Windows/iOS/Android use them by default; on Linux run
 `tailscale set --accept-routes`).
 
+**At home with Tailscale on**: SSH to the node and the `kubectl` tunnel don't work, because the
+VPN allows web only and Tailscale sends all homelab traffic through it. Before terminal work
+at home, turn off *Use Tailscale subnets* in the Mac's Tailscale menu (or quit Tailscale).
+
 ### M7. Approve the homelab route (only if needed, 1 min)
 
 After the `tailscale` release is applied (Part 2, step 6), *Machines → homelab* should show

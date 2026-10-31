@@ -4,7 +4,7 @@
 
 **Created**: 2026-10-30
 
-**Status**: Draft
+**Status**: Implemented and deployed 2026-10-31. Domain `valyalkin.com`; HL Budget at https://budget.valyalkin.com. hl-helm PRs #21 (cert-manager, ingress-tls, gates), #22 (production certificates), #23 (hl-budget host), #24 (Tailscale gateway), #25 (nginx host and docs).
 
 **Input**: User description: "Enable my application to be accessible from home network on any device and also from outside using any VPN solution which is easiest to setup and secure." Refined in discussion on 2026-10-30: use an own domain bought on Cloudflare, one trusted certificate shared by every homelab app, and Tailscale for access from outside; no ports opened to the internet. The owner is the primary user; the home router is a standard consumer router with unknown settings. Buying the domain and the other account and device steps are manual tasks for the owner.
 
@@ -48,6 +48,11 @@ homelab platform, the HL Budget deployment configuration and the sign-in provide
 - Q: What router is at home? → A: A standard consumer router; details unknown. The spec
   therefore includes a fallback if the router refuses DNS answers that point at a private
   address (Edge Cases).
+- Q (during implementation): With the VPN on, a device sends all homelab traffic through the
+  VPN, even at home, and the policy allows web only, so the owner's SSH to the node fails while
+  the VPN is on. Allow SSH through the VPN? → A: No; too risky. The VPN stays web-only (80, 443).
+  At home, the owner turns off the VPN's subnet routes (or the VPN) on the laptop before using
+  SSH or `kubectl` (Edge Cases).
 - Q: Branch name? → A: `005-home-and-remote-access` (the earlier empty `005-tailscale-access`
   branch was renamed), since the feature covers the domain and certificate as well as the VPN.
 
@@ -163,7 +168,9 @@ views.
   unreachable by name until the internet returns; this is accepted for this feature. Sign-in
   needs the internet anyway.
 - **The VPN is connected while at home**: the app still works at the same address. It does not
-  matter whether traffic goes directly or through the VPN.
+  matter whether traffic goes directly or through the VPN. Only web traffic is allowed through the VPN, so SSH to the node
+  (and the `kubectl` tunnel) fails while the VPN routes are on. The owner turns off "Use
+  Tailscale subnets" (or Tailscale) on the laptop for terminal work at home.
 - **The homelab node's private address changes** (for example after a router reset): the app is
   unreachable until the DNS record and the VPN route are updated. The quickstart must list both
   places; reserving the node's address in the router is a recommended manual step.

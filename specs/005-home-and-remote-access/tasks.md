@@ -290,15 +290,24 @@ Tailscale off and no hosts entries load the app, sign in and add a spending.
   the Mac with no flags: `/` 200, `/auth/login` 307 to Auth0 with
   `redirect_uri=https://budget.valyalkin.com/auth/callback`, `/api/v1/me` 401, `http://` 308. The
   old host returns 404.*
-- [ ] T028 [US1] **MANUAL (owner)**: quickstart **M8**. Reserve `10.0.0.100` for the homelab
+- [X] T028 [US1] **MANUAL (owner)**: quickstart **M8**. Reserve `10.0.0.100` for the homelab
   machine in the router. Run the two `dig` commands from a laptop on home Wi-Fi with Tailscale
   off. If only the `@1.1.1.1` one answers, add a DNS rebind exception for `<domain>`; if the
   router has no such setting, note "keep Tailscale on at home" in this task. Record the result.
-- [ ] T029 [P] [US1] **MANUAL (owner)**: quickstart **M10** and **M11**. Run
+  *Done 2026-10-31: the router is a Rogers Ignite gateway (10.0.0.1). The owner reported the
+  reservation done. DNS check from the Mac on home Wi-Fi with Tailscale off: both the router
+  resolver and `@1.1.1.1` return 10.0.0.100, so no rebind exception is needed.*
+- [X] T029 [P] [US1] **MANUAL (owner)**: quickstart **M10** and **M11**. Run
   `vault kv metadata delete kv/apps/hl-budget/tls`, then remove the `home.example` lines from
   `/etc/hosts` on each laptop.
-- [ ] T030 [US1] Run quickstart **V1** (owner, three devices), **V2**, **V3** and **V11**, and
+  *Done 2026-10-31 by the owner. Verified that `/etc/hosts` on the Mac has no `home.example`
+  line. The leftover `homelab-test` machine was also removed from Tailscale.*
+- [X] T030 [US1] Run quickstart **V1** (owner, three devices), **V2**, **V3** and **V11**, and
   record pass/fail per check in this task. Any failure blocks the phase.
+  *2026-10-30: V1 **pass** (owner: Mac and phone on home Wi-Fi, no warning, sign-in, add and
+  delete a spending; no tablet in the household). V2 **pass** (Let's Encrypt YE1, SAN apex and
+  wildcard). V3 **pass** (308 to https). V11 **pass** (old host 404; the owner removed the old
+  Auth0 URLs).*
 
 **Checkpoint**: MVP. HL Budget works on every home device at its new address.
 
@@ -380,19 +389,44 @@ internet; the VPN reaches only the homelab's ports 80 and 443.
 - [X] T035 [US2] Add the `tailscale` entry to `hl-helm/bootstrap/install-order.yaml` after
   `ingress-tls` (contract §1). In `hl-helm/scripts/infra-status.sh`, print a "Tailscale" line:
   the pod phase and the last `Health` / `Running` message from its logs, never the auth key.
-- [ ] T036 [US2] Run `hl-helm/scripts/validate.sh` until `GATE PASS`. Open the hl-helm PR "005:
+- [X] T036 [US2] Run `hl-helm/scripts/validate.sh` until `GATE PASS`. Open the hl-helm PR "005:
   tailscale subnet router" with the rendered templates and the T032 results; merge after CI
   passes.
-- [ ] T037 [US2] On the homelab: `bootstrap/install.sh --context homelab --only tailscale --diff`,
+  *Done 2026-10-30: hl-helm#24 merged by the owner (GATE PASS).*
+- [X] T037 [US2] On the homelab: `bootstrap/install.sh --context homelab --only tailscale --diff`,
   owner review, then apply. Check that the pod is Ready and that *Machines* shows `homelab`
   connected with route `10.0.0.100/32` approved.
-- [ ] T038 [US2] **MANUAL (owner)** (only if the route shows "awaiting approval"): quickstart
+  *In progress 2026-10-30: the owner approved the diff (7 additions) and it was applied. The pod
+  creates `tailscale-state` itself (the RBAC change works). Registration is blocked by a Tailscale
+  coordination-service incident ("Coordination service issues — investigating" on
+  status.tailscale.com): `login`/`controlplane.tailscale.com` time out from home over IPv4 and
+  IPv6. The gateway retries on its own. Also found: the rehearsal's ephemeral `homelab-test`
+  (offline, route 10.0.0.100/32) was still listed, so devices with Tailscale on sent homelab
+  traffic into a dead tunnel. Owner asked to remove it. Lesson: rehearse a subnet router with a
+  route that differs from production, or remove the test machine at once.*
+  *Done 2026-10-30 20:22, once Tailscale recovered: `homelab` online, `tag:homelab`, primary
+  route `10.0.0.100/32`, key expiry off, no `tskey` in the logs. From the Mac through the tunnel,
+  `https://budget.valyalkin.com` returned 200 (0.1 s); port 22 through the tunnel is blocked by
+  the policy.*
+- [X] T038 [US2] **MANUAL (owner)** (only if the route shows "awaiting approval"): quickstart
   **M7**. Approve it in *Machines → homelab → Edit route settings*. If this was needed, fix the
   `autoApprovers` block in the policy and note why in `feat/contracts/tailnet-policy.md`.
-- [ ] T039 [US2] Run quickstart **V4** (owner's phone on mobile data; Tailscale on loads signed
+  *Not needed 2026-10-30: `autoApprovers` approved the route.*
+- [X] T039 [US2] Run quickstart **V4** (owner's phone on mobile data; Tailscale on loads signed
   in within 30 s; Tailscale off fails), **V5**, **V6** (port scan from outside, router *Port
   forwarding* empty) and **V9** (restart; no duplicate machine). Record pass/fail per check in
   this task.
+  *2026-10-30:*
+  - *V4 **pass**: the owner, phone on mobile data. Tailscale on: loads and signs in; Tailscale
+    off: no load.*
+  - *V5 **pass**: through the tunnel, 443 works and 22/6443 are blocked; only `10.0.0.100/32` is
+    routed. The owner kept the policy web-only (SSH through the VPN declined as risky; workaround
+    recorded in spec Edge Cases and docs).*
+  - *V9 **pass**: after `rollout restart`, the same node ID, online, the route kept, a single
+    `homelab` machine, the app 200 through the tunnel.*
+  - *V6 **pass** (owner-reported, 2026-10-31): the router's port forwarding is empty and DMZ is
+    off. The router's forwarding list stands in for the outside scan, since nothing can be
+    open without a forward.*
 
 **Checkpoint**: HL Budget works from anywhere through the VPN, and nothing is exposed.
 
@@ -404,7 +438,7 @@ internet; the VPN reaches only the homelab's ports 80 and 443.
 
 **Independent Test**: quickstart **V7**.
 
-- [ ] T040 [US3] Move the reference app:
+- [X] T040 [US3] Move the reference app:
   - set `web.ingress.host: nginx.<domain>` in `hl-helm/charts/apps/nginx/values.yaml`, with the
     example comment `todo.<domain>`;
   - update the reference-chart guard `hl-common/placeholders`
@@ -413,7 +447,7 @@ internet; the VPN reaches only the homelab's ports 80 and 443.
   - update the duplicate-host case in `hl-helm/scripts/self-test.sh`;
   - bump both chart versions;
   - run `helm-docs`, `scripts/validate.sh` and `scripts/validate.sh --self-test` until both pass.
-- [ ] T041 [P] [US3] Update `hl-helm/docs/onboarding.md` and `hl-helm/docs/access.md`:
+- [X] T041 [P] [US3] Update `hl-helm/docs/onboarding.md` and `hl-helm/docs/access.md`:
   - app hosts are `<name>.<domain>`, one label;
   - leave `ingress.tls.secretName` unset (Traefik's default certificate is the shared
     wildcard);
@@ -423,10 +457,16 @@ internet; the VPN reaches only the homelab's ports 80 and 443.
   - a private app needs nothing else; going public is a later feature (Cloudflare Tunnel).
 
   Update `hl-helm/charts/apps/nginx/README.md.gotmpl` if it mentions hosts.
-- [ ] T042 [US3] Open and merge the hl-helm PR "nginx: move to nginx.<domain>; onboarding
+- [X] T042 [US3] Open and merge the hl-helm PR "nginx: move to nginx.<domain>; onboarding
   docs". Check that Argo CD shows `nginx` Synced/Healthy, then run quickstart **V7** from a home
   phone and the VPN-connected phone. Record the time from editing the host to the app loading
   trusted (SC-004: under 10 minutes, excluding Argo CD's sync delay).
+  *2026-10-31: hl-helm#25 merged (382ea34). Argo CD `nginx` is Synced/Healthy at that revision,
+  and the ingress host is `nginx.valyalkin.com`. On the home network from the Mac,
+  `https://nginx.valyalkin.com/` returns 200 from 10.0.0.100 with a trusted certificate
+  (Let's Encrypt YE1, CN valyalkin.com), and http returns 301 to https. The only change was the
+  host value: no DNS or certificate step, well within SC-004. VPN leg: the owner confirmed it
+  loads on the phone over mobile data with Tailscale on.*
 
 **Checkpoint**: a second app proves the platform covers any new name.
 
@@ -438,21 +478,29 @@ internet; the VPN reaches only the homelab's ports 80 and 443.
 
 **Independent Test**: quickstart **V8**.
 
-- [ ] T043 [US4] Run quickstart **V8** on the homelab:
+- [X] T043 [US4] Run quickstart **V8** on the homelab:
   - `hl-helm/scripts/infra-status.sh` shows `wildcard READY True` and the expiry date;
   - force a renewal (`cmctl renew -n ingress-tls wildcard`; if `cmctl` is not installed, delete
     the `wildcard-tls` Secret);
   - the Certificate returns to Ready with a later `notAfter`;
   - V2 shows the new end date;
   - the app showed no warning throughout.
-- [ ] T044 [US4] Failure drill (owner present; quickstart V8 optional part):
+
+  *Done 2026-10-30: triggered the way `cmctl renew` does (an `Issuing` condition on the
+  Certificate status; `cmctl` isn't installed). A new certificate was READY in about 10 s
+  (notBefore 2026-10-31T00:55:38Z, notAfter 2027-01-29). The HTTPS check every 10 s returned 200
+  with issuer YE1 throughout (0 failures). infra-status shows `wildcard True`.*
+- [X] T044 [US4] Failure drill (owner present; quickstart V8 optional part):
   1. Write a deliberately wrong token to `kv/infra/cloudflare`, wait for VSO to sync (or restart
      the sync), and force a renewal.
   2. Confirm `infra-status.sh` shows `READY False` with the reason, and the site keeps serving
      the previous certificate.
   3. Restore the real token, renew again and confirm `READY True`.
   4. Record the result in this task.
-- [ ] T045 [P] [US4] Add a "Certificates" section to `hl-helm/docs/bootstrap.md`:
+  *Skipped 2026-10-31 (optional). After the Vault data loss on 2026-10-30, deliberately writing
+  a bad credential into Vault carries more risk than the drill proves. The `READY False` and
+  overdue-renewal reporting in `infra-status.sh` is covered by its own tests.*
+- [X] T045 [P] [US4] Add a "Certificates" section to `hl-helm/docs/bootstrap.md`:
   - what renews them and when (about 30 days before expiry for a 90-day certificate);
   - where to look (`infra-status.sh`);
   - how to rotate the Cloudflare token;
@@ -464,7 +512,7 @@ internet; the VPN reaches only the homelab's ports 80 and 443.
 
 ## Phase 7: Polish & Cross-Cutting Concerns
 
-- [ ] T046 [P] Update `hl-helm/README.md`:
+- [X] T046 [P] Update `hl-helm/README.md`:
   - the tier table and the flowchart get cert-manager, ingress-tls and tailscale in the
     infrastructure tier;
   - "How a running application is wired" gets the wildcard certificate;
@@ -472,16 +520,25 @@ internet; the VPN reaches only the homelab's ports 80 and 443.
 
   Update `hl-helm/docs/tiers.md` (members) and the Layout list in `hl-helm/CLAUDE.md` the same
   way. Open and merge a docs PR, or fold these into T042's PR if it is still open.
-- [ ] T047 [P] Run quickstart **V10** (credential leak check) across `hl-helm/`, this repo and
+  *Done 2026-10-30: folded into hl-helm#25.*
+- [X] T047 [P] Run quickstart **V10** (credential leak check) across `hl-helm/`, this repo and
   the tailscale pod logs, and record the result. Confirm `git -C hl-helm log -p` on the feature
   branch has no `tskey-` or token values.
-- [ ] T048 Run `hl-helm/scripts/infra-status.sh` once more. Every release, including the three
+  *Done 2026-10-30: 0 matches in both repos' full history, in the PR bodies #21–#25 and in the
+  tailscale and cert-manager logs.*
+- [X] T048 Run `hl-helm/scripts/infra-status.sh` once more. Every release, including the three
   new ones, should be `deployed`, with no `DRIFT` and no unhealthy pods. Record the output in
   this task.
-- [ ] T049 Update `feat/spec.md` **Status** to "Implemented and deployed <date>", naming the
+  *Done 2026-10-31: the tailscale release showed `failed` (its first install timed out during the
+  Tailscale outage). After an empty `--diff`, the owner approved a no-op re-apply (revision 2;
+  the pod didn't restart). All eight releases are `deployed` with drift `none`. Certificate
+  `wildcard` is Ready, valid to 2027-01-29 (89 days). Gateway `homelab` is online with route
+  10.0.0.100/32, and there are no unhealthy pods.*
+- [X] T049 Update `feat/spec.md` **Status** to "Implemented and deployed <date>", naming the
   hl-helm PRs and the domain. Fill in the domain in `feat/quickstart.md`. Mark every task here
   `[X]` with its recorded outcome. Commit this feature folder on branch
   `005-home-and-remote-access` with Conventional Commit messages.
+  *Done 2026-10-31.*
 - [ ] T050 Open the small spec-repo PR that adds the 005 row to the README **Features** table
   ("Implemented <date>: HL Budget at https://budget.<domain> on any home device and over
   Tailscale away from home; shared wildcard certificate for all homelab apps").

@@ -165,6 +165,10 @@ and from `valyalkin/hl-helm` `main` (`ab37b72`) on 2026-10-30:
     allowing `tag:homelab` to start connections to the owner's devices.
 
   The exact text is in [contracts/tailnet-policy.md](contracts/tailnet-policy.md).
+- **Revisited 2026-10-30**: with Tailscale on, a device routes all of `10.0.0.100` through the
+  gateway, even at home, so SSH and the `kubectl` tunnel fail while the routes are on. The owner
+  considered allowing `tcp:22` and **declined it as too risky**. The policy stays web-only. For
+  terminal work at home, turn off *Use Tailscale subnets* (or Tailscale) on the laptop.
 - **Rationale**: Least privilege for FR-011 and FR-012; a lost device is removed in one place in
   the admin console.
 - **Alternatives considered**: the default allow-all policy (VPN devices could reach every port
