@@ -1,4 +1,5 @@
-# Service repositories, checked out here as git worktrees (branch per spec).
+# Service and platform repositories, checked out here as git worktrees (branch per spec).
 # Each has its own history; see specs/*/plan.md "Source Code".
 /hl-budget-backend/
 /hl-budget-frontend/
+/hl-helm/
