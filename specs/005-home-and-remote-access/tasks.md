@@ -539,10 +539,11 @@ internet; the VPN reaches only the homelab's ports 80 and 443.
   `[X]` with its recorded outcome. Commit this feature folder on branch
   `005-home-and-remote-access` with Conventional Commit messages.
   *Done 2026-10-31.*
-- [ ] T050 Open the small spec-repo PR that adds the 005 row to the README **Features** table
+- [X] T050 Open the small spec-repo PR that adds the 005 row to the README **Features** table
   ("Implemented <date>: HL Budget at https://budget.<domain> on any home device and over
   Tailscale away from home; shared wildcard certificate for all homelab apps").
-- [ ] T051 Update the memory note `hl-budget-tls-vpn-deferred.md` (in the Claude project memory
+  *Done 2026-10-31: PR #10 (feature PR #9 merges first).*
+- [X] T051 Update the memory note `hl-budget-tls-vpn-deferred.md` (in the Claude project memory
   folder) and its `MEMORY.md` line:
   - the feature is done;
   - the new host and domain;
@@ -551,9 +552,12 @@ internet; the VPN reaches only the homelab's ports 80 and 443.
 
   Also update `homelab-kubeconfig.md`'s host line (the ingress host is now `budget.<domain>`;
   `curl -k` is no longer needed).
-- [ ] T052 Remove the hl-helm worktree once all hl-helm PRs are merged:
+  *Done 2026-10-31: the plan note was replaced by `homelab-domain-access.md` (deployed state);
+  the kubeconfig and Vault notes now link to it.*
+- [X] T052 Remove the hl-helm worktree once all hl-helm PRs are merged:
   `git -C ../hl-helm worktree remove "$PWD/hl-helm"`. Keep the `.gitignore`/`.ignore` lines for
   next time.
+  *Done 2026-10-31: the hl-helm PRs #21–#25 are all merged, and the worktree was removed.*
 
 ---
 
