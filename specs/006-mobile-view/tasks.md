@@ -720,7 +720,7 @@ attention" and Add is disabled. Fix 3 rows and remove 1. Then "All rows look goo
   frontend-developer:frontend-developer
 - [X] T064 [P] Update `fe/README.md`: the phone layout (below 640px), where phone code lives,
   and how to run `pnpm e2e --project=phone` · skill: frontend-developer:frontend-developer
-- [ ] T065 Run quickstart.md §3 by hand at 390px locally, including steps 8 (iPhone zoom) and 9
+- [X] T065 Run quickstart.md §3 by hand at 390px locally, including steps 8 (iPhone zoom) and 9
   (rotation) on a real phone once deployed. Note anything that differs from the spec in
   Implementation notes · skill: none
 - [X] T066 Ship, with the user's agreement:
@@ -775,7 +775,7 @@ attention" and Add is disabled. Fix 3 rows and remove 1. Then "All rows look goo
   as an API key; replaced by `crypto.randomUUID()` and listed in `.gitleaksignore`). Release
   `17-ac055d4`, hl-helm#26 merged, Argo CD Synced/Healthy. The 27 phone journeys pass against
   https://budget.valyalkin.com.
-- **Open**: T065, by hand on a real iPhone (zoom, keyboard, back swipe, rotation).
+- **Real iPhone (T065)**: checked by the user on 2026-10-31 at https://budget.valyalkin.com; all good.
 
 ---
 
