@@ -1,0 +1,106 @@
+# OpenAPI changes for feature 007, against the v1 document published by hl-budget-backend
+# (feature 004). Only changed parts are shown. All changes are backward compatible in shape:
+# two new required response fields and new descriptions. The name rule change is explained in
+# research.md R-008 and plan.md Complexity Tracking.
+openapi: 3.1.0
+info:
+  title: HL Budget API (delta for 007)
+  version: v1
+paths:
+  /api/v1/spendings:
+    post:
+      description: >-
+        Creates a spending. The category and account must already exist: give each by id, or by a
+        name matched ignoring case and surrounding spaces. Nothing is created when a name does
+        not match.
+      responses:
+        "422":
+          description: Validation failed, including an unknown category or account name.
+          content:
+            application/problem+json:
+              examples:
+                unknownCategoryName:
+                  value:
+                    type: urn:problem:hl-budget:unprocessable-entity
+                    title: Unprocessable Entity
+                    status: 422
+                    detail: "1 field is invalid: categoryName"
+                    traceId: 4bf92f3577b34da6a3ce929d0e0e4736
+                    errors:
+                      - pointer: "#/categoryName"
+                        field: categoryName
+                        code: NotFound
+                        message: is not one of your categories
+  /api/v1/spendings/{spendingId}:
+    put:
+      description: Same rule as POST /api/v1/spendings for categoryName and accountName.
+  /api/v1/spending-imports:
+    post:
+      description: >-
+        Creates every row as a spending, all or nothing. Each row's category and account must
+        already exist (matched by name ignoring case and surrounding spaces). Nothing is created
+        when any name does not match; every failing row is reported.
+      responses:
+        "422":
+          content:
+            application/problem+json:
+              examples:
+                unknownNames:
+                  value:
+                    type: urn:problem:hl-budget:unprocessable-entity
+                    title: Unprocessable Entity
+                    status: 422
+                    detail: "2 fields are invalid: spendings[2].categoryName, spendings[5].accountName"
+                    traceId: 4bf92f3577b34da6a3ce929d0e0e4736
+                    errors:
+                      - pointer: "#/spendings/2/categoryName"
+                        field: spendings[2].categoryName
+                        code: NotFound
+                        message: is not one of your categories
+                      - pointer: "#/spendings/5/accountName"
+                        field: spendings[5].accountName
+                        code: NotFound
+                        message: is not one of your accounts
+components:
+  schemas:
+    SpendingRequest:
+      properties:
+        categoryName:
+          description: >-
+            Instead of categoryId: matched against the caller's categories ignoring case and
+            surrounding spaces. Refused (422, NotFound) when none matches; never creates a
+            category.
+        accountName:
+          description: >-
+            Instead of accountId: matched against the caller's accounts ignoring case and
+            surrounding spaces. Refused (422, NotFound) when none matches; never creates an
+            account.
+    SpendingImportRow:
+      properties:
+        categoryName:
+          description: >-
+            Matched against the caller's categories ignoring case and surrounding spaces. Refused
+            (422, NotFound) when none matches; never creates a category.
+        accountName:
+          description: >-
+            Matched against the caller's accounts ignoring case and surrounding spaces. Refused
+            (422, NotFound) when none matches; never creates an account.
+    Category:
+      required: [id, name, isDefault, spendingCount, color]
+      properties:
+        color:
+          type: string
+          pattern: "^#[0-9a-f]{6}$"
+          readOnly: true
+          description: >-
+            The category's colour in charts. Fixed for the 17 defaults; assigned once to a custom
+            category when it is created and kept after renaming.
+          example: "#1e5b45"
+    CategoryTotal:
+      required: [category, total, spendingCount, color]
+      properties:
+        color:
+          type: string
+          pattern: "^#[0-9a-f]{6}$"
+          description: The category's colour, the same as Category.color.
+          example: "#c2410c"

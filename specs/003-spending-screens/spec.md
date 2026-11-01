@@ -413,6 +413,7 @@ sign out, check the signed-out message returns and no spending data is visible.
 - **FR-035**: Category and account fields MUST let the user pick from a dropdown of their
   existing items or type a name. A typed name that does not match an existing item (ignoring
   letter case) MUST be created as a new category or account when the spending is saved.
+  *Changed by [007](../007-fix-pie-csv-categories/spec.md): a typed name must match an existing item; nothing is created outside Settings.*
 - **FR-036**: The check mark MUST save the row and X (or Escape) MUST cancel it without changes.
 - **FR-037**: Before saving, every field MUST be checked; if any is missing or invalid nothing is
   saved, the row stays open with what was typed, and a message names the problem using the
@@ -477,6 +478,7 @@ sign out, check the signed-out message returns and no spending data is visible.
   Neighbouring slices MUST have distinguishable colours, and slices MUST be identifiable by more
   than colour alone (legend order and labels, and the slice's name and amount on hover or
   focus).
+  *Changed by [007](../007-fix-pie-csv-categories/spec.md): each slice uses its category's fixed colour, and hover, focus or tap names the slice.*
 - **FR-073**: A month with no spendings MUST show a short empty message in the card.
 
 **Settings**
