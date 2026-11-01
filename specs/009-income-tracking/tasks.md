@@ -583,11 +583,11 @@ are valid, add them, and check they appear on Income and not on Spendings.
   categories") and `specs/006-mobile-view/spec.md` (FR-017) · skill: none
 - [X] T061 Run the full gates: `./gradlew check` in the backend; `pnpm typecheck && pnpm lint &&
   pnpm test && pnpm e2e` in the frontend (desktop and phone projects, axe) · skill: none
-- [ ] T062 Backend release first: open the PR, merge after the user agrees, let the release
+- [X] T062 Backend release first: open the PR, merge after the user agrees, let the release
   workflow open the hl-helm PR, merge it after the user agrees, then verify with
   `homelab:hl-deploy-status` (V7 applied, pod Ready, new endpoints answer `401` without a token) ·
   skill: homelab:hl-deploy-status
-- [ ] T063 Frontend release: the same flow, then `homelab:hl-deploy-status` · skill:
+- [X] T063 Frontend release: the same flow, then `homelab:hl-deploy-status` · skill:
   homelab:hl-deploy-status
 - [ ] T064 Live check on https://budget.valyalkin.com on a desktop and a phone (quickstart §5):
   the existing user sees Salary and Investments, records one income on each device, Spendings
