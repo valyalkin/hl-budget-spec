@@ -376,7 +376,7 @@ equal to the other two.
   `homelab:hl-deploy-status` (V6 applied, pod Ready) · skill: homelab:hl-deploy-status
 - [X] T040 Frontend release: the same flow, then `homelab:hl-deploy-status` · skill:
   homelab:hl-deploy-status
-- [ ] T041 Live check on https://budget.valyalkin.com on a desktop and a phone (quickstart §5):
+- [X] T041 Live check on https://budget.valyalkin.com on a desktop and a phone (quickstart §5):
   existing accounts each have a colour (none grey `#8a908b`), By account totals equal the month
   total. Then update the README Features table in the spec repo with a small PR (row for 008,
   "Implemented <date>") · skill: none
