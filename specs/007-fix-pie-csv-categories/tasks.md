@@ -458,12 +458,12 @@ creates either; the server refuses unknown names per row.
   must exist") · skill: none
 - [X] T046 Run the full gates: `./gradlew check` in the backend; `pnpm typecheck && pnpm lint &&
   pnpm test && pnpm e2e` in the frontend (desktop and phone projects, axe) · skill: none
-- [ ] T047 Backend release first (research R-014): open the PR, merge after the user agrees, let
+- [X] T047 Backend release first (research R-014): open the PR, merge after the user agrees, let
   the release workflow open the hl-helm PR, merge it after the user agrees, then verify with
   `homelab:hl-deploy-status` (V5 applied, pod Ready) · skill: homelab:hl-deploy-status
-- [ ] T048 Frontend release: the same flow, then `homelab:hl-deploy-status` · skill:
+- [X] T048 Frontend release: the same flow, then `homelab:hl-deploy-status` · skill:
   homelab:hl-deploy-status
-- [ ] T049 Live check on https://budget.valyalkin.com on a desktop and a phone (quickstart §5:
+- [X] T049 Live check on https://budget.valyalkin.com on a desktop and a phone (quickstart §5:
   §4.1–4.3), then update the README Features table in the spec repo with a small PR (row for
   007, "Implemented <date>") · skill: none
 
