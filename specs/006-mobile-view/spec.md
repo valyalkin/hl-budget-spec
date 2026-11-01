@@ -460,6 +460,7 @@ check all 9 are saved, the list shows the latest imported month, and "Added 9 sp
   User Story 2).
 - **FR-048**: Saving a spending MUST create a typed category or account name that does not exist
   yet (ignoring letter case) in the same step, so nothing is created if the spending is refused.
+  *Changed by [007](../007-fix-pie-csv-categories/spec.md): a typed name must match an existing item; nothing is created outside Settings.*
 - **FR-049**: After a successful add or save, the screen MUST close and the Spendings list MUST
   show the year and month of the spending's date, with the list, total, count and breakdown
   updated.
@@ -528,6 +529,7 @@ check all 9 are saved, the list shows the latest imported month, and "Added 9 sp
   attention or no rows remain, and otherwise read "Add N spendings" (or "Add 1 spending").
 - **FR-096**: Adding MUST save every row, whatever its month, create any new category or account
   names once each, and be all or nothing; it MUST happen at most once per tap.
+  *Changed by [007](../007-fix-pie-csv-categories/spec.md): category and account names must exist; an import never creates them.*
 - **FR-097**: After a successful add, the Spendings list MUST show the year and month of the
   latest imported date with the note "Added N spendings from [file name]".
 - **FR-098**: If adding fails, nothing MUST be saved, and the review MUST stay with every row and

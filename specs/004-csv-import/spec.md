@@ -311,6 +311,7 @@ category or account was created.
 - **FR-032**: Adding MUST save every remaining row as a spending with its date, whatever month or
   year that is, and create any category or account names that don't exist yet (one per name,
   ignoring letter case).
+  *Changed by [007](../007-fix-pie-csv-categories/spec.md): category and account names must exist; an import never creates them.*
 - **FR-033**: Adding MUST be all or nothing: if any row is refused or the save fails, no
   spending, category or account is created, and the review stays open with all rows and edits.
 - **FR-034**: Adding MUST happen at most once per user action, even if the button is clicked or
