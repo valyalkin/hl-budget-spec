@@ -411,6 +411,7 @@ check all 9 are saved, the list shows the latest imported month, and "Added 9 sp
   figures and the number of spendings ("1 spending", "14 spendings").
 - **FR-017**: The screen MUST show a two-option switch "Spendings | By category"; Spendings is
   selected on opening.
+  *Changed by [008](../008-account-breakdown/spec.md): the switch has a third option, "By account".*
 - **FR-018**: The Spendings view MUST list every spending of the month, newest date first, each
   row showing only the date as "Mon D" (for example "Oct 27"), the category and the amount;
   tapping a row MUST open the Edit spending screen for it.

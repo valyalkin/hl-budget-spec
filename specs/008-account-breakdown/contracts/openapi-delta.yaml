@@ -1,0 +1,97 @@
+# OpenAPI changes for feature 008, against the v1 document published by hl-budget-backend
+# (feature 007). Only changed parts are shown. All changes are additive: one new endpoint, two new
+# schemas and one new required response field (Account.color). Requests are unchanged.
+openapi: 3.1.0
+info:
+  title: HL Budget API (delta for 008)
+  version: v1
+paths:
+  /api/v1/account-totals:
+    get:
+      tags: [Totals]
+      operationId: listAccountTotals
+      summary: The caller's spending per account over a date range
+      description: >-
+        One entry per account with at least one spending in the range, and only those; largest
+        total first, ties by account name. Not paged: bounded by the caller's account count.
+      parameters:
+        - name: from
+          in: query
+          required: true
+          description: Earliest date, inclusive
+          schema: { type: string, format: date }
+          example: "2026-10-01"
+        - name: to
+          in: query
+          required: true
+          description: Latest date, inclusive; not before `from`, at most 366 days after it
+          schema: { type: string, format: date }
+          example: "2026-10-31"
+      responses:
+        "200":
+          description: Totals per account; `items` is empty when nothing was spent
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/AccountTotals" }
+              examples:
+                october:
+                  value:
+                    from: "2026-10-01"
+                    to: "2026-10-31"
+                    total: { amount: "2326.44", currency: CAD }
+                    spendingCount: 3
+                    items:
+                      - account: { id: 3f1c5a8e-2b7d-4e0a-9c61-0d2f4b8a7e11, name: Debit card }
+                        total: { amount: "2150.00", currency: CAD }
+                        spendingCount: 1
+                        color: "#e11d48"
+                      - account: { id: 7a2d9e41-5c3b-4f8a-b1e6-2d4c8f0a9b33, name: Amex }
+                        total: { amount: "176.44", currency: CAD }
+                        spendingCount: 2
+                        color: "#0891b2"
+        "401": { $ref: "#/components/responses/Unauthenticated" }
+        "422":
+          description: >-
+            Missing or malformed `from`/`to`, `from` after `to`, or a range longer than 366 days
+            (same rules and messages as /api/v1/category-totals).
+          $ref: "#/components/responses/ValidationFailed"
+        "500": { $ref: "#/components/responses/InternalError" }
+        "503": { $ref: "#/components/responses/ServiceUnavailable" }
+components:
+  schemas:
+    Account:
+      required: [id, name, spendingCount, color]
+      properties:
+        color:
+          type: string
+          description: >-
+            The account's colour, assigned when it is created and kept for its lifetime
+            (including renames). Drawn in the By account table and donut.
+          pattern: "^#[0-9a-f]{6}$"
+          example: "#e11d48"
+          readOnly: true
+    AccountTotal:
+      type: object
+      description: One account's spending in the range
+      required: [account, total, spendingCount, color]
+      properties:
+        account: { $ref: "#/components/schemas/Ref" }
+        total: { $ref: "#/components/schemas/MoneyTotal" }
+        spendingCount: { type: integer, format: int64, minimum: 1, example: 2 }
+        color:
+          type: string
+          description: The account's colour, the same as Account.color
+          pattern: "^#[0-9a-f]{6}$"
+          example: "#e11d48"
+    AccountTotals:
+      type: object
+      description: "Spending per account over a date range: only accounts with spending, largest first"
+      required: [from, to, total, spendingCount, items]
+      properties:
+        from: { type: string, format: date, example: "2026-10-01" }
+        to: { type: string, format: date, example: "2026-10-31" }
+        total: { $ref: "#/components/schemas/MoneyTotal" }
+        spendingCount: { type: integer, format: int64, minimum: 0, example: 14 }
+        items:
+          type: array
+          items: { $ref: "#/components/schemas/AccountTotal" }
