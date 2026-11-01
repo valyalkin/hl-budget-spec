@@ -469,6 +469,7 @@ sign out, check the signed-out message returns and no spending data is visible.
 
 - **FR-070**: The By category card MUST offer a Table / Pie toggle; the chosen view MUST be kept
   when the month changes.
+  *Extended by [008](../008-account-breakdown/spec.md): a By account card with the same behaviour sits below it.*
 - **FR-071**: Table view MUST list every category with spending in the selected month, and only
   those, with its amount and share of the month's total (as a whole-number percentage), largest
   first, plus a total row.
