@@ -490,6 +490,7 @@ sign out, check the signed-out message returns and no spending data is visible.
 - **FR-081**: Categories MUST list the 17 defaults (marked as defaults, not removable) and the
   user's own categories, each with how many spendings use it, and MUST let the user add and
   remove their own categories.
+  *Changed by [009](../009-income-tracking/spec.md): Categories is now Spending categories, beside Income categories.*
 - **FR-082**: Accounts MUST list the user's accounts with how many spendings use each, and MUST
   let the user add and remove accounts.
 - **FR-083**: Adding a category or account MUST be refused with a message when the name is empty

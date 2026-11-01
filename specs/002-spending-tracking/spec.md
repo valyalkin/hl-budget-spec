@@ -356,6 +356,7 @@ the list.
 - **Spendings only**: income, transfers between accounts, budgets, recurring spendings, and
   importing statements are out of scope. Refunds are out of scope too: amounts are always
   positive.
+  *Extended by [009](../009-income-tracking/spec.md): income has its own entries and categories, on the shared accounts.*
 - **No reports**: totals, summaries and charts by category or month are out of scope and will
   get their own feature. The list does report how many spendings match.
 - **One user per data set**: there is no sharing of accounts or categories between users and no
