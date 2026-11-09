@@ -478,11 +478,12 @@ targets, three-option switch, menu without Import CSV.
   run the release, run `homelab:hl-deploy-status` for `hl-budget-frontend`, and do the live check
   (quickstart §5).
 
-  > In progress: committed and pushed in `fe/`, PR https://github.com/valyalkin/hl-budget-frontend/pull/13.
-  > Left for the user to agree to: merging the PR, merging the release's hl-helm PR, then
-  > `hl-deploy-status` and the live check. Quickstart §4 needs the signed-in app, so it is covered
-  > by CI e2e and the live check.
-- [ ] T042 In this spec repo, mark the tasks done, set spec.md **Status** to Implemented, and add
+  > Done 2026-11-09: PR https://github.com/valyalkin/hl-budget-frontend/pull/13 merged; release
+  > image `29-48133d3`, hl-helm PR #35 merged. Live: `/healthz` is 200 and `/overview` redirects to
+  > sign-in. The cluster API was unreachable (no SSH tunnel), so the Argo CD and pod checks were not
+  > run. Still open: the signed-in look at https://budget.valyalkin.com/overview (quickstart §5),
+  > which needs the user's account; the e2e job is skipped in CI as well.
+- [X] T042 In this spec repo, mark the tasks done, set spec.md **Status** to Implemented, and add
   the 011 row to the README Features table ("Implemented YYYY-MM-DD (frontend only): an Overview
   tab after Income … deployed to the homelab") in a small PR.
 

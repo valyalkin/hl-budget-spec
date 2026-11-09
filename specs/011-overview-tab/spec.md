@@ -4,7 +4,7 @@
 
 **Created**: 2026-11-08
 
-**Status**: Draft
+**Status**: Implemented
 
 **Input**: User description: "I would like to add Overview tab. Design is already done in one of the tabs here: https://claude.ai/artifact/QTxGKQCY8eE5SUq7387QCZ#page-dcb81aee8d83 Use ECharts library for all charts. Overview sits right of Income. It should show by yea earned, spent, and saved (left over), then earned vs/spent chart and table by month  and spent by category chart and table, and spent by account chart and table. Refer to the overview tab design for UI (except location of the tab). Optimize for phone screen as well."
 
