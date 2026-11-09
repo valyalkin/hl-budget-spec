@@ -306,12 +306,12 @@ Repeat on Income.
   `pnpm exec playwright test` including `e2e/phone` and `e2e/a11y.spec.ts`, and
   `docker build` under the hardened constraints as in earlier features. All must be green
   (Principle IV, SC-004, SC-005).
-- [ ] T025 Walk through `specs/010-quick-add-and-undo/quickstart.md` manual checks 1–10 against
+- [X] T025 Walk through `specs/010-quick-add-and-undo/quickstart.md` manual checks 1–10 against
   the local stack on both tabs.
-- [ ] T026 Frontend release. Open the PR (Conventional Commit `feat:`) and merge it after the
+- [X] T026 Frontend release. Open the PR (Conventional Commit `feat:`) and merge it after the
   user agrees. Let the release workflow open the hl-helm PR, and merge it after the user agrees.
   Then verify with `homelab:hl-deploy-status`. There is no backend release.
-- [ ] T027 Live check at `https://budget.valyalkin.com` (desktop): quick add and Undo on both
+- [X] T027 Live check at `https://budget.valyalkin.com` (desktop): quick add and Undo on both
   tabs. Then update the README Features table in the spec repo with a small PR (row for 010)
   and mark these tasks done.
 
