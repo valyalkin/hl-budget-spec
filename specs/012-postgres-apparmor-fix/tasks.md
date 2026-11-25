@@ -86,7 +86,7 @@ Spendings, Income and Overview for October and November 2026 (quickstart §4–5
   - If recovery fails for another reason, STOP. Never delete the PVC or the Cluster.
 - [X] T022 [US1] Verify the pod's protections (SC-006) with `kubectl -n postgres get pod postgres-1 -o jsonpath='{.spec.securityContext}{"\n"}{.spec.containers[0].securityContext}'`. Pod level: `appArmorProfile Unconfined`, `runAsUser 26`, `runAsGroup 26`, `fsGroup 26`, `runAsNonRoot true`, seccomp `RuntimeDefault`. Container level: `drop ALL`, `readOnlyRootFilesystem true`, `allowPrivilegeEscalation false`
 - [X] T023 [US1] Bring the backend back (quickstart §5): `kubectl -n hl-budget rollout restart deploy/hl-budget-backend`, wait for `1/1 Running`, and check that `curl -s -o /dev/null -w '%{http_code}' https://budget.valyalkin.com/api/v1/me` returns `401` (not `503`). Also confirm the VaultStaticSecrets in `hl-budget` and `postgres` report no new `VaultClientConfigError` events
-- [ ] T024 [US1] **Owner step**: sign in at https://budget.valyalkin.com and open Spendings, Income and Overview for October and November 2026. Months show entries, totals match pre-outage values (SC-001, SC-002), and there's no "We couldn't load your spendings"
+- [X] T024 [US1] **Owner step**: sign in at https://budget.valyalkin.com and open Spendings, Income and Overview for October and November 2026. Months show entries, totals match pre-outage values (SC-001, SC-002), and there's no "We couldn't load your spendings"
 
 **Checkpoint**: HL Budget is back; the outage is over (MVP)
 
@@ -133,7 +133,7 @@ rendered defaults keep AppArmor (quickstart §7).
 - [X] T034 [P] Update `specs/012-postgres-apparmor-fix/spec.md` **Status** line to "Implemented and deployed <date>", naming the hl-helm PR number, and add an "Implementation notes" section with anything learned during T018–T027 (as in specs 010/011)
 - [X] T035 [P] Add the 012 row to the Features table in `README.md`, following the existing rows ("Implemented <date>: Postgres pods run AppArmor-unconfined on kernels ≥ 7.0.0-43 so crash recovery works; HL Budget restored after the 2026-11-23 outage; platform only")
 - [X] T036 Commit this repository's changes on branch `012-postgres-apparmor-fix` (`spec(012): ...` / `docs: ...`), push, open the PR with `gh pr create`, and mark all tasks in this file done
-- [ ] T037 [P] Record the follow-ups from spec "Out of scope" as GitHub issues in this repository, only if the owner wants them now: crash-loop alerting, planned reboots after kernel updates, Vault auto-unseal, filing the Ubuntu kernel/AppArmor bug. Ask first; don't open them unprompted
+- [ ] T037 [P] Record the follow-ups from spec "Out of scope" as GitHub issues in this repository, only if the owner wants them now: crash-loop alerting, planned reboots after kernel updates, Vault auto-unseal, filing the Ubuntu kernel/AppArmor bug. Ask first; don't open them unprompted — deferred by the owner on 2026-11-25: do not open the issues yet
 
 ---
 
