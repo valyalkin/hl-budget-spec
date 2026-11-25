@@ -122,7 +122,7 @@ rendered defaults keep AppArmor (quickstart §7).
 - [X] T030 [P] [US3] Add a paragraph to `hl-helm/docs/bootstrap.md` § "After a node restart" (FR-009). After unsealing Vault, check `kubectl -n postgres get pods` and the apps that use it. If `postgres-1` crash-loops with `could not signal for checkpoint: Permission denied`, check `journalctl -k | grep 'DENIED.*signal.*comm="postgres"'` on the node and confirm `cluster.appArmorUnconfined: true` in `bootstrap/values/postgres.yaml`. Link the chart README section from T015
 - [X] T031 [P] [US3] Add a row to `hl-helm/docs/validation-results.md` (match its existing table format) recording the 2026-11-25 incident check: the forced unclean restart from T025–T026, its recovery time and zero denials
 - [X] T032 [US3] Run `hl-helm/scripts/validate.sh` (`GATE PASS`), commit the doc changes on `hl-helm` branch `012-postgres-apparmor-fix` (`docs: ...`), push, and open the hl-helm PR with `gh pr create`. Include in the body: a summary, the link to hl-budget-spec 012, the `--diff` output from T019 (hl-helm constitution III), verification results from T021–T027, and the 🤖 Generated with Claude Code line
-- [ ] T033 [US3] **Owner step**: review and merge the hl-helm PR. Then confirm `git -C hl-helm log origin/main` contains the change, so the next `install.sh` from `main` keeps the fix
+- [X] T033 [US3] **Owner step**: review and merge the hl-helm PR. Then confirm `git -C hl-helm log origin/main` contains the change, so the next `install.sh` from `main` keeps the fix
 
 **Checkpoint**: repository and cluster agree; the next upgrade keeps the fix
 
